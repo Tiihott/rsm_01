@@ -47,6 +47,7 @@ package com.teragrep.rsm_01;
 
 import com.sun.jna.Pointer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
@@ -93,7 +94,7 @@ class JavaLognormTest {
         JavaLognorm javaLognorm = new JavaLognorm();
         Pointer ctx = javaLognorm.liblognormInitCtx();
         Assertions.assertNotNull(ctx);
-        String samplesPath = "src/test/resources/messages.sampd";
+        String samplesPath = "src/test/resources/sample.rulebase";
         int i = javaLognorm.liblognormLoadSamples(ctx, samplesPath);
         assertEquals(0, i);
         javaLognorm.liblognormExitCtx(ctx);
@@ -105,7 +106,7 @@ class JavaLognormTest {
             JavaLognorm javaLognorm = new JavaLognorm();
             Pointer ctx = javaLognorm.liblognormInitCtx();
             Assertions.assertNotNull(ctx);
-            Path path = Paths.get("src/test/resources/messages.sampd");
+            Path path = Paths.get("src/test/resources/sample.rulebase");
             String read = Files.readAllLines(path).get(0);
             int i = javaLognorm.liblognormLoadSamplesFromString(ctx, read);
             assertEquals(0, i);
@@ -120,4 +121,17 @@ class JavaLognormTest {
         assertEquals(0, i);
     }
 
+    @Disabled("json-c is causing SIGSEGV, debugging in progress")
+    @Test
+    public void normalizeTest() {
+        JavaLognorm javaLognorm = new JavaLognorm();
+        Pointer ctx = javaLognorm.liblognormInitCtx();
+        Assertions.assertNotNull(ctx);
+        String samplesPath = "src/test/resources/sample.rulebase";
+        int i = javaLognorm.liblognormLoadSamples(ctx, samplesPath);
+        assertEquals(0, i);
+        // Where the heck are the liblognorm sample message logs?!
+        String normalizedMessage = javaLognorm.liblognormNormalize(ctx, "myhostname: code=23");
+        javaLognorm.liblognormExitCtx(ctx);
+    }
 }
