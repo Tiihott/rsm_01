@@ -80,20 +80,39 @@ public class JavaLognorm {
         return LibJavaLognorm.INSTANCE.hasAdvancedStats();
     }
 
-    public String liblognormNormalize(Pointer ctx, String text) {
+    public Pointer liblognormNormalize(Pointer ctx, String text) {
         if (ctx != Pointer.NULL) {
             Pointer jref = LibJavaLognorm.INSTANCE.normalize(ctx, text);
             if (jref == Pointer.NULL) {
                 throw new NullPointerException("LogNorm() failed to perform extraction.");
             }
+            return jref;
+        }
+        else {
+            throw new IllegalArgumentException("LogNorm() not initialized.");
+        }
+    }
+
+    public String liblognormReadResult(Pointer ctx, Pointer jref) {
+        if (ctx != Pointer.NULL) {
+            if (jref == Pointer.NULL) {
+                throw new NullPointerException("LogNorm() failed to perform extraction.");
+            }
             String cstring = LibJavaLognorm.INSTANCE.readResult(jref);
             String javaString = String.copyValueOf(cstring.toCharArray(), 0, cstring.length());
-            LibJavaLognorm.INSTANCE.destroyResult(jref);
             return javaString;
         }
         else {
             throw new IllegalArgumentException("LogNorm() not initialized.");
         }
+    }
+
+    public void liblognormDestroyResult(Pointer jref) {
+        LibJavaLognorm.INSTANCE.destroyResult(jref);
+    }
+
+    public void jsoncMadness() {
+        LibJavaLognorm.INSTANCE.jsoncMadness();
     }
 
 }

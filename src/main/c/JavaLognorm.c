@@ -120,15 +120,15 @@ int hasAdvancedStats() {
 }
 
 void *normalize(ln_ctx *context, char *line) {
-    ln_ctx ctx = *context;
-    struct json_object *json = NULL;
+     ln_ctx ctx = *context;
+     struct json_object *jobj = NULL;
      // run
-     int i = ln_normalize(ctx, line, strlen(line), &json);
+     int i = ln_normalize(ctx, line, strlen(line), &jobj);
      if(i != 0) {
         return NULL;
      }
-     if(json != NULL) {
-         return json;
+     if(jobj != NULL) {
+        return jobj;
      }
 }
 
@@ -138,4 +138,38 @@ char *readResult(struct json_object *jref) {
 
 void destroyResult(struct json_object *jref) {
     json_object_put(jref);
+}
+
+void jsoncMadness() {
+//    struct json_object *jobj;
+//        char *str = "{ \"msg-type\": [ \"0xdeadbeef\", \"irc log\" ], \
+//    		\"msg-from\": { \"class\": \"soldier\", \"name\": \"Wixilav\" }, \
+//    		\"msg-to\": { \"class\": \"supreme-commander\", \"name\": \"[Redacted]\" }, \
+//    		\"msg-log\": [ \
+//    			\"soldier: Boss there is a slight problem with the piece offering to humans\", \
+//    			\"supreme-commander: Explain yourself soldier!\", \
+//    			\"soldier: Well they don't seem to move anymore...\", \
+//    			\"supreme-commander: Oh snap, I came here to see them twerk!\" \
+//    			] \
+//    		}";
+//        printf("str:\n---\n%s\n---\n\n", str);
+//        jobj = json_tokener_parse(str);
+//        printf("jobj from str:\n---\n%s\n---\n", json_object_to_json_string(jobj));
+
+        //ln_ctx *ctx = malloc(sizeof(ln_ctx)); // Create a pointer for ln context and allocates memory to it
+        ln_ctx ctx = ln_initCtx(); // dereferences the pointer, initializing the context.
+        if (ctx != NULL) {
+        int j = ln_loadSamplesFromString(ctx, "rule=:%all:rest%"); // loads rulebase to the context
+        if (j == 0) {
+        struct json_object *jobj2 = NULL; // Creates a pointer to json object.
+        char arr[] = "offline";
+        char *ptr_arr = arr;
+        int i = ln_normalize(ctx, ptr_arr, strlen(ptr_arr), &jobj2);
+        if (i == 0 && jobj2 != NULL) {
+            printf("jobj2 from str:\n---\n%s\n---\n", json_object_to_json_string(jobj2));
+        }
+        //json_object_put(jobj2);
+        }
+        ln_exitCtx(ctx);
+        }
 }

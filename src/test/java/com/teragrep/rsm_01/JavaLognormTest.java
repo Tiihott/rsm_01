@@ -50,10 +50,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class JavaLognormTest {
@@ -106,9 +102,7 @@ class JavaLognormTest {
             JavaLognorm javaLognorm = new JavaLognorm();
             Pointer ctx = javaLognorm.liblognormInitCtx();
             Assertions.assertNotNull(ctx);
-            Path path = Paths.get("src/test/resources/sample.rulebase");
-            String read = Files.readAllLines(path).get(0);
-            int i = javaLognorm.liblognormLoadSamplesFromString(ctx, read);
+            int i = javaLognorm.liblognormLoadSamplesFromString(ctx, "rule=:%all:rest%");
             assertEquals(0, i);
             javaLognorm.liblognormExitCtx(ctx);
         });
@@ -121,17 +115,66 @@ class JavaLognormTest {
         assertEquals(0, i);
     }
 
-    @Disabled("json-c is causing SIGSEGV, debugging in progress")
     @Test
     public void normalizeTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
         Pointer ctx = javaLognorm.liblognormInitCtx();
         Assertions.assertNotNull(ctx);
-        String samplesPath = "src/test/resources/sample.rulebase";
-        int i = javaLognorm.liblognormLoadSamples(ctx, samplesPath);
+        LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+        opts.CTXOPT_ADD_EXEC_PATH = false;
+        opts.CTXOPT_ADD_ORIGINALMSG = false;
+        opts.CTXOPT_ADD_RULE = false;
+        opts.CTXOPT_ADD_RULE_LOCATION = false;
+        opts.CTXOPT_ALLOW_REGEX = false;
+        javaLognorm.liblognormSetCtxOpts(ctx, opts);
+        Assertions.assertNotNull(ctx);
+        String samplesString = "rule=:%all:rest%";
+        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
         assertEquals(0, i);
-        // Where the heck are the liblognorm sample message logs?!
-        String normalizedMessage = javaLognorm.liblognormNormalize(ctx, "myhostname: code=23");
+
+        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        // destroy jref!
+        Assertions.assertNotNull(jref);
+
         javaLognorm.liblognormExitCtx(ctx);
     }
+
+    @Disabled("debugging: json_object_to_json_string() is causing SIGSEGV")
+    @Test
+    public void readResultTest() {
+        JavaLognorm javaLognorm = new JavaLognorm();
+        Pointer ctx = javaLognorm.liblognormInitCtx();
+        Assertions.assertNotNull(ctx);
+        String samplesString = "rule=:%all:rest%";
+        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        assertEquals(0, i);
+        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        String s = javaLognorm.liblognormReadResult(ctx, jref);
+        Assertions.assertEquals("offline", s);
+        javaLognorm.liblognormDestroyResult(jref);
+        Assertions.assertNotNull(jref);
+        javaLognorm.liblognormExitCtx(ctx);
+    }
+
+    @Disabled("debugging: json_object_put: Assertion `jso->_ref_count > 0' failed")
+    @Test
+    public void destroyResultTest() {
+        JavaLognorm javaLognorm = new JavaLognorm();
+        Pointer ctx = javaLognorm.liblognormInitCtx();
+        Assertions.assertNotNull(ctx);
+        String samplesString = "rule=:%all:rest%";
+        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        assertEquals(0, i);
+        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        javaLognorm.liblognormDestroyResult(jref);
+        Assertions.assertNotNull(jref);
+        javaLognorm.liblognormExitCtx(ctx);
+    }
+
+    @Test
+    public void jsoncMadnessTest() {
+        JavaLognorm javaLognorm = new JavaLognorm();
+        javaLognorm.jsoncMadness();
+    }
+
 }
