@@ -141,34 +141,41 @@ void destroyResult(struct json_object *jref) {
 }
 
 void jsoncMadness() {
-//    struct json_object *jobj;
-//        char *str = "{ \"msg-type\": [ \"0xdeadbeef\", \"irc log\" ], \
-//    		\"msg-from\": { \"class\": \"soldier\", \"name\": \"Wixilav\" }, \
-//    		\"msg-to\": { \"class\": \"supreme-commander\", \"name\": \"[Redacted]\" }, \
-//    		\"msg-log\": [ \
-//    			\"soldier: Boss there is a slight problem with the piece offering to humans\", \
-//    			\"supreme-commander: Explain yourself soldier!\", \
-//    			\"soldier: Well they don't seem to move anymore...\", \
-//    			\"supreme-commander: Oh snap, I came here to see them twerk!\" \
-//    			] \
-//    		}";
-//        printf("str:\n---\n%s\n---\n\n", str);
-//        jobj = json_tokener_parse(str);
-//        printf("jobj from str:\n---\n%s\n---\n", json_object_to_json_string(jobj));
 
-        //ln_ctx *ctx = malloc(sizeof(ln_ctx)); // Create a pointer for ln context and allocates memory to it
-        ln_ctx ctx = ln_initCtx(); // dereferences the pointer, initializing the context.
+    struct json_object *jobj = NULL;
+        char *str = "{ \"msg-type\": [ \"0xdeadbeef\", \"irc log\" ], \
+    		\"msg-from\": { \"class\": \"soldier\", \"name\": \"Wixilav\" }, \
+    		\"msg-to\": { \"class\": \"supreme-commander\", \"name\": \"[Redacted]\" }, \
+    		\"msg-log\": [ \
+    			\"soldier: Boss there is a slight problem with the piece offering to humans\", \
+    			\"supreme-commander: Explain yourself soldier!\", \
+    			\"soldier: Well they don't seem to move anymore...\", \
+    			\"supreme-commander: Oh snap, I came here to see them twerk!\" \
+    			] \
+    		}";
+        printf("str:\n---\n%s\n---\n\n", str);
+        jobj = json_tokener_parse(str);
+        printf("jobj from str:\n---\n%s\n---\n", json_object_to_json_string(jobj));
+        json_object_put(jobj);
+        // json-c is working correctly here.
+
+        // Go through log normalization process.
+        ln_ctx ctx = ln_initCtx(); // initializing the liblognorm context.
         if (ctx != NULL) {
         int j = ln_loadSamplesFromString(ctx, "rule=:%all:rest%"); // loads rulebase to the context
         if (j == 0) {
-        struct json_object *jobj2 = NULL; // Creates a pointer to json object.
+        struct json_object *jobj2 = NULL; // Creates a pointer for a json object.
         char arr[] = "offline";
         char *ptr_arr = arr;
-        int i = ln_normalize(ctx, ptr_arr, strlen(ptr_arr), &jobj2);
+        size_t arrLength = strlen(ptr_arr);
+        printf("array: %s, length: %d", arr, arrLength);
+        int i = ln_normalize(ctx, ptr_arr, strlen(ptr_arr), &jobj2); // FIXME: Root cause for all json-c problems?
         if (i == 0 && jobj2 != NULL) {
-            printf("jobj2 from str:\n---\n%s\n---\n", json_object_to_json_string(jobj2));
+            // FIXME: When trying to convert the json object to string, json-c runs into a SIGSEGV.
+            //printf("jobj2 from str:\n---\n%s\n---\n", json_object_to_json_string(jobj2));
         }
-        //json_object_put(jobj2);
+        // FIXME:  java: /builddir/build/BUILD/json-c-0.17-build/json-c-json-c-0.17-20230812/json_object.c:280: json_object_put: Assertion `jso->_ref_count > 0' failed.
+        json_object_put(jobj2);
         }
         ln_exitCtx(ctx);
         }
