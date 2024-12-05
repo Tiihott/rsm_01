@@ -111,8 +111,4 @@ public class JavaLognorm {
         LibJavaLognorm.INSTANCE.destroyResult(jref);
     }
 
-    public void jsoncMadness() {
-        LibJavaLognorm.INSTANCE.jsoncMadness();
-    }
-
 }

@@ -100,6 +100,4 @@ public interface LibJavaLognorm extends Library {
 
     // Releases the results of the normalization from memory.
     public abstract void destroyResult(Pointer jref);
-
-    public abstract void jsoncMadness();
 }

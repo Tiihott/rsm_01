@@ -47,7 +47,6 @@ package com.teragrep.rsm_01;
 
 import com.sun.jna.Pointer;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,13 +132,12 @@ class JavaLognormTest {
         assertEquals(0, i);
 
         Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
-        // destroy jref!
-        Assertions.assertNotNull(jref);
 
+        // cleanup
+        javaLognorm.liblognormDestroyResult(jref);
         javaLognorm.liblognormExitCtx(ctx);
     }
 
-    @Disabled("debugging: json_object_to_json_string() is causing SIGSEGV")
     @Test
     public void readResultTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
@@ -150,13 +148,12 @@ class JavaLognormTest {
         assertEquals(0, i);
         Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
         String s = javaLognorm.liblognormReadResult(ctx, jref);
-        Assertions.assertEquals("offline", s);
+        Assertions.assertEquals("{ \"all\": \"offline\" }", s);
         javaLognorm.liblognormDestroyResult(jref);
         Assertions.assertNotNull(jref);
         javaLognorm.liblognormExitCtx(ctx);
     }
 
-    @Disabled("debugging: json_object_put: Assertion `jso->_ref_count > 0' failed")
     @Test
     public void destroyResultTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
@@ -169,12 +166,6 @@ class JavaLognormTest {
         javaLognorm.liblognormDestroyResult(jref);
         Assertions.assertNotNull(jref);
         javaLognorm.liblognormExitCtx(ctx);
-    }
-
-    @Test
-    public void jsoncMadnessTest() {
-        JavaLognorm javaLognorm = new JavaLognorm();
-        javaLognorm.jsoncMadness();
     }
 
 }
