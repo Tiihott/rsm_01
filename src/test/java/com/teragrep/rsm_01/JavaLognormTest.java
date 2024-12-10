@@ -47,6 +47,7 @@ package com.teragrep.rsm_01;
 
 import com.sun.jna.Pointer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -179,6 +180,29 @@ class JavaLognormTest {
         Pointer ctx = javaLognorm.liblognormInitCtx();
         Assertions.assertNotNull(ctx);
         javaLognorm.liblognormEnableDebug(ctx, 1);
+        javaLognorm.liblognormExitCtx(ctx);
+    }
+
+    @Disabled("Test hangs if debugging CB is already set by initCtx(), and fails if it is not.")
+    @Test
+    public void debugCBTest() {
+        JavaLognorm javaLognorm = new JavaLognorm();
+        Pointer ctx = javaLognorm.liblognormInitCtx();
+        Assertions.assertNotNull(ctx);
+
+        int b = javaLognorm.liblognormSetDebugCB(ctx);
+        Assertions.assertEquals(0, b);
+
+        javaLognorm.liblognormEnableDebug(ctx, 1);
+        String samplesString = "rule=:%all:rest%";
+        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        assertEquals(0, i);
+        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        String s = javaLognorm.liblognormReadResult(ctx, jref);
+        Assertions.assertEquals("{ \"all\": \"offline\" }", s);
+
+        // cleanup
+        javaLognorm.liblognormDestroyResult(jref);
         javaLognorm.liblognormExitCtx(ctx);
     }
 
