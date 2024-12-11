@@ -47,7 +47,6 @@ package com.teragrep.rsm_01;
 
 import com.sun.jna.Pointer;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -183,7 +182,6 @@ class JavaLognormTest {
         javaLognorm.liblognormExitCtx(ctx);
     }
 
-    @Disabled("Test hangs if debugging CB is already set by initCtx(), and fails if it is not.")
     @Test
     public void debugCBTest() {
         JavaLognorm javaLognorm = new JavaLognorm();

@@ -87,11 +87,6 @@ void *initCtx() {
         // add exception handling here. ln_ returns null if error occurred.
         return NULL;
     }
-    int i = ln_setDebugCB(*ctx, dbgCallBack, NULL);
-    if (i == 0) {
-    printf("liblognorm debugging enabled successfully!\n");
-    }
-    ln_enableDebug(*ctx, 1);
     return ctx;
 }
 
@@ -154,14 +149,14 @@ void destroyResult(struct json_object *jref) {
     json_object_put(jref);
 }
 
-void enableDebug(ln_ctx ctx, int i) {
-    ln_enableDebug(ctx, i);
+void enableDebug(ln_ctx *ctx, int i) {
+    ln_enableDebug(*ctx, i);
 }
 
-int setDebugCB(ln_ctx ctx) {
-    return ln_setDebugCB(ctx, dbgCallBack, NULL);
+int setDebugCB(ln_ctx *ctx) {
+    return ln_setDebugCB(*ctx, dbgCallBack, NULL);
 };
 
-int setErrMsgCB(ln_ctx ctx) {
-    return ln_setErrMsgCB(ctx, errCallBack, NULL);
+int setErrMsgCB(ln_ctx *ctx) {
+    return ln_setErrMsgCB(*ctx, errCallBack, NULL);
 }
