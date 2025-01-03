@@ -63,47 +63,38 @@ class JavaLognormTest {
     @Test
     public void ctxTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void setCtxOptsTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
         LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
         opts.CTXOPT_ADD_EXEC_PATH = false;
         opts.CTXOPT_ADD_ORIGINALMSG = false;
         opts.CTXOPT_ADD_RULE = false;
         opts.CTXOPT_ADD_RULE_LOCATION = false;
         opts.CTXOPT_ALLOW_REGEX = false;
-        javaLognorm.liblognormSetCtxOpts(ctx, opts);
-        Assertions.assertNotNull(ctx);
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormSetCtxOpts(opts);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void loadSamplesTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
         String samplesPath = "src/test/resources/sample.rulebase";
-        int i = javaLognorm.liblognormLoadSamples(ctx, samplesPath);
+        int i = javaLognorm.liblognormLoadSamples(samplesPath);
         assertEquals(0, i);
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void loadSamplesFromStringTest() {
         assertDoesNotThrow(() -> {
             JavaLognorm javaLognorm = new JavaLognorm();
-            Pointer ctx = javaLognorm.liblognormInitCtx();
-            Assertions.assertNotNull(ctx);
-            int i = javaLognorm.liblognormLoadSamplesFromString(ctx, "rule=:%all:rest%");
+            int i = javaLognorm.liblognormLoadSamplesFromString("rule=:%all:rest%");
             assertEquals(0, i);
-            javaLognorm.liblognormExitCtx(ctx);
+            javaLognorm.liblognormExitCtx();
         });
     }
 
@@ -117,105 +108,91 @@ class JavaLognormTest {
     @Test
     public void normalizeTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
         LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
         opts.CTXOPT_ADD_EXEC_PATH = false;
         opts.CTXOPT_ADD_ORIGINALMSG = false;
         opts.CTXOPT_ADD_RULE = false;
         opts.CTXOPT_ADD_RULE_LOCATION = false;
         opts.CTXOPT_ALLOW_REGEX = false;
-        javaLognorm.liblognormSetCtxOpts(ctx, opts);
-        Assertions.assertNotNull(ctx);
+        javaLognorm.liblognormSetCtxOpts(opts);
         String samplesString = "rule=:%all:rest%";
 
-        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        int i = javaLognorm.liblognormLoadSamplesFromString(samplesString);
         assertEquals(0, i); // 0 means successful normalization, anything else means an error happened.
-        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        Pointer jref = javaLognorm.liblognormNormalize("offline");
 
         // cleanup
         javaLognorm.liblognormDestroyResult(jref);
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void readResultTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
         String samplesString = "rule=:%all:rest%";
-        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        int i = javaLognorm.liblognormLoadSamplesFromString(samplesString);
         assertEquals(0, i);
-        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        Pointer jref = javaLognorm.liblognormNormalize("offline");
 
-        String s = javaLognorm.liblognormReadResult(ctx, jref);
+        String s = javaLognorm.liblognormReadResult(jref);
         Assertions.assertEquals("{ \"all\": \"offline\" }", s);
 
         // cleanup
         javaLognorm.liblognormDestroyResult(jref);
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void destroyResultTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
         String samplesString = "rule=:%all:rest%";
-        int i = javaLognorm.liblognormLoadSamplesFromString(ctx, samplesString);
+        int i = javaLognorm.liblognormLoadSamplesFromString(samplesString);
         assertEquals(0, i);
-        Pointer jref = javaLognorm.liblognormNormalize(ctx, "offline");
+        Pointer jref = javaLognorm.liblognormNormalize("offline");
 
         javaLognorm.liblognormDestroyResult(jref);
         Assertions.assertNotNull(jref);
 
         // cleanup
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void enableDebugTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
 
         assertDoesNotThrow(() -> {
-            javaLognorm.liblognormEnableDebug(ctx, 1);
+            javaLognorm.liblognormEnableDebug(1);
         });
 
         // cleanup
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void setDebugCBTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
 
-        int a = javaLognorm.liblognormSetDebugCB(ctx);
+        int a = javaLognorm.liblognormSetDebugCB();
         Assertions.assertEquals(0, a); // 0 if setting debug message handler was a success.
-        javaLognorm.liblognormEnableDebug(ctx, 1);
+        javaLognorm.liblognormEnableDebug(1);
 
         // Assert debug log messages here. Logs can include memory information so they are not identical in each run.
 
         // cleanup
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
     @Test
     public void setErrMsgCBTest() {
         JavaLognorm javaLognorm = new JavaLognorm();
-        Pointer ctx = javaLognorm.liblognormInitCtx();
-        Assertions.assertNotNull(ctx);
-
-        int a = javaLognorm.liblognormSetErrMsgCB(ctx);
+        int a = javaLognorm.liblognormSetErrMsgCB();
         Assertions.assertEquals(0, a); // 0 if setting error message handler was a success.
 
         // Assert error log messages here.
 
         // cleanup
-        javaLognorm.liblognormExitCtx(ctx);
+        javaLognorm.liblognormExitCtx();
     }
 
 }
