@@ -99,8 +99,8 @@ class JavaLognormImplTest {
 
     @Test
     public void hasAdvancedStatsTest() {
-        int i = new JavaLognorm.Smart().liblognormHasAdvancedStats();
-        assertEquals(0, i);
+        boolean i = new JavaLognorm.Smart().liblognormHasAdvancedStats();
+        assertFalse(i);
     }
 
     @Test

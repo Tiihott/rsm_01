@@ -71,7 +71,7 @@ public interface JavaLognorm {
 
     public static final class Smart {
 
-        public int liblognormHasAdvancedStats() {
+        public boolean liblognormHasAdvancedStats() {
             return LibJavaLognorm.INSTANCE.hasAdvancedStats();
         }
 
