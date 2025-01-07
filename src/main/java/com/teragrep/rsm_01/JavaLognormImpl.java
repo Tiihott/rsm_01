@@ -49,7 +49,7 @@ import com.sun.jna.Pointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JavaLognormImpl implements JavaLognorm {
+public final class JavaLognormImpl implements JavaLognorm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaLognormImpl.class);
 
