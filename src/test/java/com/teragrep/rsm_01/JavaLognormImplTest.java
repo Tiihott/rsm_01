@@ -55,10 +55,8 @@ class JavaLognormImplTest {
 
     @Test
     public void versionTest() {
-        JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
-        String s = javaLognormImpl.liblognormVersionCheck();
+        String s = new JavaLognorm.Smart().liblognormVersionCheck();
         Assertions.assertEquals("2.0.6", s);
-        javaLognormImpl.liblognormExitCtx();
     }
 
     @Test
@@ -101,10 +99,8 @@ class JavaLognormImplTest {
 
     @Test
     public void hasAdvancedStatsTest() {
-        JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
-        int i = javaLognormImpl.liblognormHasAdvancedStats();
+        int i = new JavaLognorm.Smart().liblognormHasAdvancedStats();
         assertEquals(0, i);
-        javaLognormImpl.liblognormExitCtx();
     }
 
     @Test

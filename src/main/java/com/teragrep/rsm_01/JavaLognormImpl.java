@@ -59,14 +59,6 @@ public class JavaLognormImpl implements JavaLognorm {
         ctx = LibJavaLognorm.INSTANCE.initCtx();
     }
 
-    public String liblognormVersionCheck() {
-        return LibJavaLognorm.INSTANCE.version();
-    }
-
-    public Pointer liblognormInitCtx() {
-        return LibJavaLognorm.INSTANCE.initCtx();
-    }
-
     public void liblognormExitCtx() {
         if (ctx != Pointer.NULL) {
             LibJavaLognorm.INSTANCE.exitCtx(ctx);
@@ -101,10 +93,6 @@ public class JavaLognormImpl implements JavaLognorm {
         else {
             throw new IllegalArgumentException("LogNorm() not initialized.");
         }
-    }
-
-    public int liblognormHasAdvancedStats() {
-        return LibJavaLognorm.INSTANCE.hasAdvancedStats();
     }
 
     public Pointer liblognormNormalize(String text) {

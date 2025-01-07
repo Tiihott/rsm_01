@@ -49,10 +49,6 @@ import com.sun.jna.Pointer;
 
 public interface JavaLognorm {
 
-    public abstract String liblognormVersionCheck();
-
-    public abstract Pointer liblognormInitCtx();
-
     public abstract void liblognormExitCtx();
 
     public abstract void liblognormSetCtxOpts(LibJavaLognorm.OptionsStruct opts);
@@ -60,8 +56,6 @@ public interface JavaLognorm {
     public abstract int liblognormLoadSamples(String samples);
 
     public abstract int liblognormLoadSamplesFromString(String samples);
-
-    public abstract int liblognormHasAdvancedStats();
 
     public abstract Pointer liblognormNormalize(String text);
 
@@ -74,4 +68,15 @@ public interface JavaLognorm {
     public abstract int liblognormSetDebugCB();
 
     public abstract int liblognormSetErrMsgCB();
+
+    public static final class Smart {
+
+        public int liblognormHasAdvancedStats() {
+            return LibJavaLognorm.INSTANCE.hasAdvancedStats();
+        }
+
+        public String liblognormVersionCheck() {
+            return LibJavaLognorm.INSTANCE.version();
+        }
+    }
 }
