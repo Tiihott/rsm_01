@@ -46,131 +46,32 @@
 package com.teragrep.rsm_01;
 
 import com.sun.jna.Pointer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class JavaLognorm {
+public interface JavaLognorm {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JavaLognorm.class);
+    public abstract String liblognormVersionCheck();
 
-    private Pointer ctx;
+    public abstract Pointer liblognormInitCtx();
 
-    JavaLognorm() {
-        ctx = LibJavaLognorm.INSTANCE.initCtx();
-    }
+    public abstract void liblognormExitCtx();
 
-    public String liblognormVersionCheck() {
-        return LibJavaLognorm.INSTANCE.version();
-    }
+    public abstract void liblognormSetCtxOpts(LibJavaLognorm.OptionsStruct opts);
 
-    public Pointer liblognormInitCtx() {
-        return LibJavaLognorm.INSTANCE.initCtx();
-    }
+    public abstract int liblognormLoadSamples(String samples);
 
-    public void liblognormExitCtx() {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.INSTANCE.exitCtx(ctx);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract int liblognormLoadSamplesFromString(String samples);
 
-    public void liblognormSetCtxOpts(LibJavaLognorm.OptionsStruct opts) {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.INSTANCE.setCtxOpts(ctx, opts);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract int liblognormHasAdvancedStats();
 
-    public int liblognormLoadSamples(String samples) {
-        if (ctx != Pointer.NULL) {
-            return LibJavaLognorm.INSTANCE.loadSamples(ctx, samples);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract Pointer liblognormNormalize(String text);
 
-    public int liblognormLoadSamplesFromString(String samples) {
-        if (ctx != Pointer.NULL) {
-            return LibJavaLognorm.INSTANCE.loadSamplesFromString(ctx, samples);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract String liblognormReadResult(Pointer jref);
 
-    public int liblognormHasAdvancedStats() {
-        return LibJavaLognorm.INSTANCE.hasAdvancedStats();
-    }
+    public abstract void liblognormDestroyResult(Pointer jref);
 
-    public Pointer liblognormNormalize(String text) {
-        if (ctx != Pointer.NULL) {
-            Pointer jref = LibJavaLognorm.INSTANCE.normalize(ctx, text);
-            if (jref == Pointer.NULL) {
-                throw new NullPointerException("LogNorm() failed to perform extraction.");
-            }
-            return jref;
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract void liblognormEnableDebug(int i);
 
-    public String liblognormReadResult(Pointer jref) {
-        if (ctx != Pointer.NULL) {
-            if (jref == Pointer.NULL) {
-                throw new NullPointerException("LogNorm() failed to perform extraction.");
-            }
-            String cstring = LibJavaLognorm.INSTANCE.readResult(jref);
-            String javaString = String.copyValueOf(cstring.toCharArray(), 0, cstring.length());
-            return javaString;
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
+    public abstract int liblognormSetDebugCB();
 
-    public void liblognormDestroyResult(Pointer jref) {
-        LibJavaLognorm.INSTANCE.destroyResult(jref);
-    }
-
-    /* EnableDebug modifier does not affect if debug cb is enabled or not, instead it affects something else entirely. Black box.
-       This means that the EnableDebug method should always be paired with SetDebugCB method, instead of using it for enabling/disabling the already defined debug cb.
-       This also means that SetErrMsgCB method should always be called separately from SetDebugCB.*/
-    public void liblognormEnableDebug(int i) {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.INSTANCE.enableDebug(ctx, i);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-
-    }
-
-    // Should always be called before enabling debug mode.
-    public int liblognormSetDebugCB() {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.DebugCallback.DebugCallbackImpl callbackImpl = new LibJavaLognorm.DebugCallback.DebugCallbackImpl();
-            return LibJavaLognorm.INSTANCE.setDebugCB(ctx, callbackImpl);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
-
-    // Should always be called separately from the debug methods.
-    public int liblognormSetErrMsgCB() {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.ErrorCallback.ErrorCallbackImpl callbackImpl = new LibJavaLognorm.ErrorCallback.ErrorCallbackImpl();
-            return LibJavaLognorm.INSTANCE.setErrMsgCB(ctx, callbackImpl);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-    }
-
+    public abstract int liblognormSetErrMsgCB();
 }
