@@ -126,20 +126,6 @@ public final class JavaLognormImpl implements JavaLognorm {
         LibJavaLognorm.INSTANCE.destroyResult(jref);
     }
 
-    /* EnableDebug modifier does not affect if debug cb is enabled or not, instead it affects something else entirely. Black box.
-       This means that the EnableDebug method should always be paired with SetDebugCB method, instead of using it for enabling/disabling the already defined debug cb.
-       This also means that SetErrMsgCB method should always be called separately from SetDebugCB.*/
-    public void liblognormEnableDebug(int i) {
-        if (ctx != Pointer.NULL) {
-            LibJavaLognorm.INSTANCE.enableDebug(ctx, i);
-        }
-        else {
-            throw new IllegalArgumentException("LogNorm() not initialized.");
-        }
-
-    }
-
-    // Should always be called before enabling debug mode.
     public int liblognormSetDebugCB() {
         if (ctx != Pointer.NULL) {
             LibJavaLognorm.DebugCallback.DebugCallbackImpl callbackImpl = new LibJavaLognorm.DebugCallback.DebugCallbackImpl();
@@ -150,7 +136,7 @@ public final class JavaLognormImpl implements JavaLognorm {
         }
     }
 
-    // Should always be called separately from the debug methods.
+    // Should always be called separately from the debug method.
     public int liblognormSetErrMsgCB() {
         if (ctx != Pointer.NULL) {
             LibJavaLognorm.ErrorCallback.ErrorCallbackImpl callbackImpl = new LibJavaLognorm.ErrorCallback.ErrorCallbackImpl();

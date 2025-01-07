@@ -63,8 +63,6 @@ public interface JavaLognorm {
 
     public abstract void liblognormDestroyResult(Pointer jref);
 
-    public abstract void liblognormEnableDebug(int i);
-
     public abstract int liblognormSetDebugCB();
 
     public abstract int liblognormSetErrMsgCB();
