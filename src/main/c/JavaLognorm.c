@@ -56,6 +56,11 @@ typedef struct OptionsStruct_TAG {
     int CTXOPT_ADD_RULE_LOCATION;
 }OptionsStruct;
 
+typedef struct NormalizedStruct_TAG {
+    int rv;
+    json_object *jref;
+}NormalizedStruct;
+
 typedef void(*ErrorCallback)(void __attribute__((unused)) *cookie, const char *msg, size_t __attribute__((unused)) lenMsg);
 
 typedef void(*DebugCallback)(void __attribute__((unused)) *cookie, const char *msg, size_t __attribute__((unused)) lenMsg);
@@ -112,16 +117,14 @@ int hasAdvancedStats() {
     return ln_hasAdvancedStats();
 }
 
-void *normalize(ln_ctx *context, char *line) {
+// To get exception handling to work properly in java, the method should return both the jobj and i.
+NormalizedStruct* normalize(ln_ctx *context, char *line, NormalizedStruct* norm) {
      ln_ctx ctx = *context;
      struct json_object *jobj = NULL;
      int i = ln_normalize(ctx, line, strlen(line), &jobj);
-     if(i != 0) {
-        return NULL;
-     }
-     if(jobj != NULL) {
-        return jobj;
-     }
+     norm->rv = i;
+     norm->jref = jobj; // if jobj2 is not null
+     return norm;
 }
 
 char *readResult(struct json_object *jref) {
