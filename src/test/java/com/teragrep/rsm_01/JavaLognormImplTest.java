@@ -116,11 +116,33 @@ class JavaLognormImplTest {
         String samplesString = "rule=:%all:rest%";
 
         int i = javaLognormImpl.liblognormLoadSamplesFromString(samplesString);
-        assertEquals(0, i); // 0 means successful normalization, anything else means an error happened.
+        assertEquals(0, i); // 0 means successful rulebase loading, anything else means an error happened.
         Pointer jref = javaLognormImpl.liblognormNormalize("offline");
 
         // cleanup
         javaLognormImpl.liblognormDestroyResult(jref);
+        javaLognormImpl.liblognormExitCtx();
+    }
+
+    @Test
+    public void normalizeExceptionTest() {
+        JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
+        LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+        opts.CTXOPT_ADD_EXEC_PATH = false;
+        opts.CTXOPT_ADD_ORIGINALMSG = false;
+        opts.CTXOPT_ADD_RULE = false;
+        opts.CTXOPT_ADD_RULE_LOCATION = false;
+        opts.CTXOPT_ALLOW_REGEX = false;
+        javaLognormImpl.liblognormSetCtxOpts(opts);
+        String samplesString = "invalidRulebase"; // load rulebase that will cause exception
+
+        int i = javaLognormImpl.liblognormLoadSamplesFromString(samplesString);
+        assertEquals(0, i); // 0 means successful rulebase loading, anything else means an error happened.
+        IllegalArgumentException e = Assertions
+                .assertThrows(IllegalArgumentException.class, () -> javaLognormImpl.liblognormNormalize("offline"));
+        Assertions.assertEquals("LogNorm() failed to perform extraction with error code: -1000", e.getMessage());
+
+        // cleanup
         javaLognormImpl.liblognormExitCtx();
     }
 
