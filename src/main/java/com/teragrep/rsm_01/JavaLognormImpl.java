@@ -104,7 +104,9 @@ public final class JavaLognormImpl implements JavaLognorm {
             if (result.rv != 0) {
                 // error occurred
                 if (result.jref == Pointer.NULL) {
-                    throw new NullPointerException("LogNorm() failed to perform extraction. Error code: " + result.rv);
+                    throw new IllegalArgumentException(
+                            "LogNorm() failed to perform extraction. Error code: " + result.rv
+                    );
                 }
                 else {
                     LOGGER
