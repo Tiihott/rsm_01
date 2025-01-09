@@ -120,10 +120,18 @@ int hasAdvancedStats() {
 // To get exception handling to work properly in java, the method should return both the jobj and i.
 NormalizedStruct* normalize(ln_ctx *context, char *line, NormalizedStruct* norm) {
      ln_ctx ctx = *context;
-     struct json_object *jobj = NULL;
+     struct json_object *jobj = json_object_new_object();
      int i = ln_normalize(ctx, line, strlen(line), &jobj);
      norm->rv = i;
-     norm->jref = jobj; // if jobj2 is not null
+     if (jobj == NULL) {
+        // jobj was null, create new generic jobj for error logging.
+        jobj = json_object_new_object();
+        json_object_object_add(jobj, "Error", json_object_new_string("Error occurred during ln_normalize()"));
+     	norm->jref = jobj;
+     } else {
+        // jobj was not null
+     	norm->jref = jobj;
+     }
      return norm;
 }
 

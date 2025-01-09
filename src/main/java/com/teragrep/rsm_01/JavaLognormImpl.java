@@ -103,21 +103,15 @@ public final class JavaLognormImpl implements JavaLognorm {
             LibJavaLognorm.NormalizedStruct result = LibJavaLognorm.INSTANCE.normalize(ctx, text, norm);
             if (result.rv != 0) {
                 // error occurred
-                if (result.jref == Pointer.NULL) {
-                    throw new IllegalArgumentException(
-                            "LogNorm() failed to perform extraction. Error code: " + result.rv
-                    );
-                }
-                else {
-                    LOGGER
-                            .error(
-                                    "LogNorm() failed to perform extraction. Generated error information: <{}>",
-                                    liblognormReadResult(result.jref)
-                            );
-                    throw new IllegalArgumentException(
-                            "LogNorm() failed to perform extraction with error code: " + result.rv
-                    );
-                }
+                LOGGER
+                        .error(
+                                "LogNorm() failed to perform extraction with error code <{}>. Generated error information: <{}>",
+                                result.rv, liblognormReadResult(result.jref)
+                        );
+                liblognormDestroyResult(result.jref); // cleanup
+                throw new IllegalArgumentException(
+                        "LogNorm() failed to perform extraction with error code: " + result.rv
+                );
             }
             return result.jref;
         }
