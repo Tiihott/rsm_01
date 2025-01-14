@@ -103,6 +103,7 @@ public final class JavaLognormImpl implements JavaLognorm {
     }
 
     public void liblognormLoadSamplesFromString(String samples) {
+        LOGGER.info("Start doing something"); // This line is used only for developing CallbackTest(). Remove after CallbackTest() is finished.
         if (ctx == Pointer.NULL) {
             throw new IllegalArgumentException(
                     "LogNorm() not initialized. Use liblognormInitCtx() to initialize the ctx."
