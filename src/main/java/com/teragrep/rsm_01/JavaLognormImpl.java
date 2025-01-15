@@ -103,7 +103,6 @@ public final class JavaLognormImpl implements JavaLognorm {
     }
 
     public void liblognormLoadSamplesFromString(String samples) {
-        LOGGER.info("Start doing something"); // This line is used only for developing CallbackTest(). Remove after CallbackTest() is finished.
         if (ctx == Pointer.NULL) {
             throw new IllegalArgumentException(
                     "LogNorm() not initialized. Use liblognormInitCtx() to initialize the ctx."
@@ -167,7 +166,7 @@ public final class JavaLognormImpl implements JavaLognorm {
             );
         }
 
-        DebugCallback.DebugCallbackImpl callbackImpl = new DebugCallback.DebugCallbackImpl();
+        DebugCallbackImpl callbackImpl = new DebugCallbackImpl();
         int i = LibJavaLognorm.jnaInstance.setDebugCB(ctx, callbackImpl);
         if (i != 0) {
             LOGGER.error("ln_setDebugCB() returned error code <{}>", i);
@@ -182,7 +181,7 @@ public final class JavaLognormImpl implements JavaLognorm {
             );
         }
 
-        ErrorCallback.ErrorCallbackImpl callbackImpl = new ErrorCallback.ErrorCallbackImpl();
+        ErrorCallbackImpl callbackImpl = new ErrorCallbackImpl();
         int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, callbackImpl);
         if (i != 0) {
             LOGGER.error("ln_setErrMsgCB() returned error code <{}>", i);
