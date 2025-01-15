@@ -167,7 +167,7 @@ public final class JavaLognormImpl implements JavaLognorm {
             );
         }
 
-        LibJavaLognorm.DebugCallback.DebugCallbackImpl callbackImpl = new LibJavaLognorm.DebugCallback.DebugCallbackImpl();
+        DebugCallback.DebugCallbackImpl callbackImpl = new DebugCallback.DebugCallbackImpl();
         int i = LibJavaLognorm.jnaInstance.setDebugCB(ctx, callbackImpl);
         if (i != 0) {
             LOGGER.error("ln_setDebugCB() returned error code <{}>", i);
@@ -182,7 +182,7 @@ public final class JavaLognormImpl implements JavaLognorm {
             );
         }
 
-        LibJavaLognorm.ErrorCallback.ErrorCallbackImpl callbackImpl = new LibJavaLognorm.ErrorCallback.ErrorCallbackImpl();
+        ErrorCallback.ErrorCallbackImpl callbackImpl = new ErrorCallback.ErrorCallbackImpl();
         int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, callbackImpl);
         if (i != 0) {
             LOGGER.error("ln_setErrMsgCB() returned error code <{}>", i);
