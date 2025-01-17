@@ -587,6 +587,8 @@
             <exclude>src/test/resources/cisco.rulebase</exclude>
             <exclude>src/test/resources/messages.rulebase</exclude>
             <exclude>src/test/resources/sample.rulebase</exclude>
+            <exclude>src/test/resources/json.rulebase</exclude>
+            <exclude>src/test/resources/jsonv1.rulebase</exclude>
             <exclude>src/test/resources/log4j2.properties</exclude>
           </excludes>
         </configuration>
