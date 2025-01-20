@@ -83,6 +83,20 @@ class JavaLognormImplTest {
     }
 
     @Test
+    public void loadSamplesExceptionTest() {
+        assertDoesNotThrow(() -> {
+            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
+            IllegalArgumentException e = Assertions
+                    .assertThrows(
+                            IllegalArgumentException.class,
+                            () -> javaLognormImpl.liblognormLoadSamples("src/test/resources/invalid.rulebase")
+                    );
+            Assertions.assertEquals("Load samples returned 1 instead of 0", e.getMessage());
+            javaLognormImpl.liblognormExitCtx();
+        });
+    }
+
+    @Test
     public void loadSamplesFromStringTest() {
         assertDoesNotThrow(() -> {
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
