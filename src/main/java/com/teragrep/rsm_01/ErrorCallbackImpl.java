@@ -49,19 +49,28 @@ import com.sun.jna.Pointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 public class ErrorCallbackImpl implements ErrorCallback {
 
-    private boolean errorOccured = false;
+    private final ArrayList<String> errors;
+
+    public ErrorCallbackImpl() {
+        errors = new ArrayList<>();
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorCallbackImpl.class);
 
     @Override
     public void invoke(Pointer cookie, String msg, int length) {
-        errorOccured = true;
+        errors.add(msg);
         LOGGER.error("liblognorm error: {}", msg);
     }
 
     public boolean isErrorOccured() {
-        return errorOccured;
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("<{}> liblognorm errors have occurred", errors.size());
+        }
+        return !errors.isEmpty();
     }
 }
