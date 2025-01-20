@@ -54,13 +54,19 @@ public final class JavaLognormImpl implements JavaLognorm {
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaLognormImpl.class);
 
     private final Pointer ctx;
+    private final ErrorCallbackImpl errorCallbackImpl;
 
     public JavaLognormImpl() {
-        this(new JavaLognorm.Smart().liblognormInitCtx());
+        this(new JavaLognorm.Smart().liblognormInitCtx(), new ErrorCallbackImpl());
     }
 
     public JavaLognormImpl(Pointer ctx) {
+        this(ctx, new ErrorCallbackImpl());
+    }
+
+    public JavaLognormImpl(Pointer ctx, ErrorCallbackImpl callbackImpl) {
         this.ctx = ctx;
+        this.errorCallbackImpl = callbackImpl;
     }
 
     public void liblognormExitCtx() {
@@ -99,6 +105,10 @@ public final class JavaLognormImpl implements JavaLognorm {
         if (i != 0) {
             LOGGER.error("ln_loadSamples() returned error code <{}>", i);
             throw new IllegalArgumentException("Load samples returned " + i + " instead of 0");
+        }
+        if (errorCallbackImpl.isErrorOccured()) {
+            LOGGER.error("ln_loadSamples() has triggered an error");
+            throw new IllegalArgumentException("ln_loadSamples() has triggered an error, but returned 0.");
         }
     }
 
@@ -181,8 +191,7 @@ public final class JavaLognormImpl implements JavaLognorm {
             );
         }
 
-        ErrorCallbackImpl callbackImpl = new ErrorCallbackImpl();
-        int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, callbackImpl);
+        int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, errorCallbackImpl);
         if (i != 0) {
             LOGGER.error("ln_setErrMsgCB() returned error code <{}>", i);
             throw new IllegalArgumentException("ln_setErrMsgCB() returned " + i + " instead of 0");

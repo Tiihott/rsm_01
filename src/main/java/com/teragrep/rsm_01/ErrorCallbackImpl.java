@@ -51,10 +51,17 @@ import org.slf4j.LoggerFactory;
 
 public class ErrorCallbackImpl implements ErrorCallback {
 
+    private boolean errorOccured = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorCallbackImpl.class);
 
     @Override
     public void invoke(Pointer cookie, String msg, int length) {
+        errorOccured = true;
         LOGGER.error("liblognorm error: {}", msg);
+    }
+
+    public boolean isErrorOccured() {
+        return errorOccured;
     }
 }
