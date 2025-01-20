@@ -97,6 +97,30 @@ class JavaLognormImplTest {
     }
 
     @Test
+    public void loadSamplesExceptionTest2() {
+        assertDoesNotThrow(() -> {
+            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
+            javaLognormImpl.liblognormSetErrMsgCB();
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_EXEC_PATH = false;
+            opts.CTXOPT_ADD_ORIGINALMSG = false;
+            opts.CTXOPT_ADD_RULE = false;
+            opts.CTXOPT_ADD_RULE_LOCATION = false;
+            opts.CTXOPT_ALLOW_REGEX = false;
+            javaLognormImpl.liblognormSetCtxOpts(opts);
+            IllegalArgumentException e = Assertions
+                    .assertThrows(
+                            IllegalArgumentException.class,
+                            () -> javaLognormImpl.liblognormLoadSamples("src/test/resources/jsonv1.rulebase")
+                    );
+            Assertions.assertEquals("ln_loadSamples() has triggered an error, but returned 0.", e.getMessage());
+
+            // cleanup
+            javaLognormImpl.liblognormExitCtx();
+        });
+    }
+
+    @Test
     public void loadSamplesFromStringTest() {
         assertDoesNotThrow(() -> {
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
@@ -187,7 +211,6 @@ class JavaLognormImplTest {
             opts.CTXOPT_ADD_RULE_LOCATION = false;
             opts.CTXOPT_ALLOW_REGEX = false;
             javaLognormImpl.liblognormSetCtxOpts(opts);
-            javaLognormImpl.liblognormSetDebugCB();
             String samplesPath = "src/test/resources/json.rulebase";
             javaLognormImpl.liblognormLoadSamples(samplesPath); // Throws exception if fails to load samples
 
@@ -197,33 +220,6 @@ class JavaLognormImplTest {
                     );
             Assertions
                     .assertEquals("ln_normalize() failed to perform extraction with error code: -1000", e.getMessage());
-
-            // cleanup
-            javaLognormImpl.liblognormExitCtx();
-        });
-    }
-
-    @Test
-    public void normalizeExceptionTest4() {
-        assertDoesNotThrow(() -> {
-            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
-            javaLognormImpl.liblognormSetErrMsgCB();
-            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
-            opts.CTXOPT_ADD_EXEC_PATH = false;
-            opts.CTXOPT_ADD_ORIGINALMSG = false;
-            opts.CTXOPT_ADD_RULE = false;
-            opts.CTXOPT_ADD_RULE_LOCATION = false;
-            opts.CTXOPT_ALLOW_REGEX = false;
-            javaLognormImpl.liblognormSetCtxOpts(opts);
-            javaLognormImpl.liblognormSetDebugCB();
-            String samplesPath = "src/test/resources/jsonv1.rulebase";
-            javaLognormImpl.liblognormLoadSamples(samplesPath); // Throws exception if fails to load samples
-
-            // Exception handling for normalization completely breaks when rulebase is using JSON while rulebase v2 is not enabled. Issue origin is in liblognorm library.
-            String s = javaLognormImpl.liblognormNormalize("Quantity: 555a");
-            Assertions
-                    .assertEquals("{ \"originalmsg\": \"Quantity: 555a\", \"unparsed-data\": \"Quantity: 555a\" }", s);
-            // As seen in the assertion, liblognorm flags the normalization as a success but outputs a JSON holding error information.
 
             // cleanup
             javaLognormImpl.liblognormExitCtx();
