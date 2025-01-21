@@ -45,7 +45,6 @@
  */
 package com.teragrep.rsm_01;
 
-import com.sun.jna.Pointer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -75,11 +74,11 @@ public class CallbackTest {
 
     @Test
     public void setDebugCBTest() {
-        Pointer ctx = new JavaLognorm.Smart().liblognormInitCtx();
-        DebugCallbackImpl callbackImpl = new DebugCallbackImpl();
+        LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+        LognormFactory lognormFactory = new LognormFactory(opts);
+        JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
         Logger loggerForTarget = (Logger) LogManager.getLogger(DebugCallbackImpl.class);
-        int i = LibJavaLognorm.jnaInstance.setDebugCB(ctx, callbackImpl);
-        Assertions.assertEquals(0, i);
+        javaLognormImpl.liblognormSetDebugCB();
         String expectedLogMessages = "liblognorm: =======================================";
 
         final Appender appender = mock(Appender.class);
@@ -92,8 +91,7 @@ public class CallbackTest {
         loggerForTarget.setLevel(Level.DEBUG);
         try {
             // invoke debug callback via loadSamplesFromString()
-            int j = LibJavaLognorm.jnaInstance.loadSamplesFromString(ctx, "rule=:%all:rest%");
-            Assertions.assertEquals(0, j);
+            javaLognormImpl.liblognormLoadSamplesFromString("rule=:%all:rest%");
             // Assert that the expected log messages are seen
             verify(appender, times(28)).append(logCaptor.capture());
             Arrays.stream(new String[] {
@@ -113,16 +111,16 @@ public class CallbackTest {
             loggerForTarget.setLevel(effectiveLevel);
         }
         // cleanup
-        LibJavaLognorm.jnaInstance.exitCtx(ctx);
+        javaLognormImpl.close();
     }
 
     @Test
     public void setErrMsgCBTest() {
-        Pointer ctx = new JavaLognorm.Smart().liblognormInitCtx();
-        ErrorCallbackImpl callbackImpl = new ErrorCallbackImpl();
+        LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+        LognormFactory lognormFactory = new LognormFactory(opts);
+        JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
         Logger loggerForTarget = (Logger) LogManager.getLogger(ErrorCallbackImpl.class);
-        int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, callbackImpl);
-        Assertions.assertEquals(0, i);
+        javaLognormImpl.liblognormSetErrMsgCB();
         String expectedLogMessages = "liblognorm error: rulebase file --NO-FILE--[0]: invalid record type detected: 'invalidSample'";
 
         final Appender appender = mock(Appender.class);
@@ -135,8 +133,7 @@ public class CallbackTest {
         loggerForTarget.setLevel(Level.DEBUG);
         try {
             // invoke error callback via loadSamplesFromString() using invalid sample,
-            int j = LibJavaLognorm.jnaInstance.loadSamplesFromString(ctx, "invalidSample");
-            Assertions.assertEquals(0, j);
+            javaLognormImpl.liblognormLoadSamplesFromString("invalidSample");
             // Assert that the expected log messages are seen
             verify(appender, times(1)).append(logCaptor.capture());
             Arrays.stream(new String[] {
@@ -156,7 +153,7 @@ public class CallbackTest {
             loggerForTarget.setLevel(effectiveLevel);
         }
         // cleanup
-        LibJavaLognorm.jnaInstance.exitCtx(ctx);
+        javaLognormImpl.close();
     }
 
 }
