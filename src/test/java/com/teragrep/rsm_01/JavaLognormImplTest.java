@@ -85,29 +85,26 @@ class JavaLognormImplTest {
     @Test
     public void loadSamplesExceptionTest() {
         assertDoesNotThrow(() -> {
-            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            LognormFactory lognormFactory = new LognormFactory(opts);
+            JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
             IllegalArgumentException e = Assertions
                     .assertThrows(
                             IllegalArgumentException.class,
                             () -> javaLognormImpl.liblognormLoadSamples("src/test/resources/invalid.rulebase")
                     );
             Assertions.assertEquals("Load samples returned 1 instead of 0", e.getMessage());
-            javaLognormImpl.liblognormExitCtx();
+            javaLognormImpl.close();
         });
     }
 
     @Test
     public void loadSamplesExceptionTest2() {
         assertDoesNotThrow(() -> {
-            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
-            javaLognormImpl.liblognormSetErrMsgCB();
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
-            opts.CTXOPT_ADD_EXEC_PATH = false;
-            opts.CTXOPT_ADD_ORIGINALMSG = false;
-            opts.CTXOPT_ADD_RULE = false;
-            opts.CTXOPT_ADD_RULE_LOCATION = false;
-            opts.CTXOPT_ALLOW_REGEX = false;
-            javaLognormImpl.liblognormSetCtxOpts(opts);
+            LognormFactory lognormFactory = new LognormFactory(opts);
+            JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
+            javaLognormImpl.liblognormSetErrMsgCB();
             IllegalArgumentException e = Assertions
                     .assertThrows(
                             IllegalArgumentException.class,
@@ -116,7 +113,7 @@ class JavaLognormImplTest {
             Assertions.assertEquals("ln_loadSamples() has triggered an error, but returned 0.", e.getMessage());
 
             // cleanup
-            javaLognormImpl.liblognormExitCtx();
+            javaLognormImpl.close();
         });
     }
 
@@ -176,14 +173,9 @@ class JavaLognormImplTest {
     @Test
     public void normalizeExceptionTest2() {
         assertDoesNotThrow(() -> {
-            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
-            opts.CTXOPT_ADD_EXEC_PATH = false;
-            opts.CTXOPT_ADD_ORIGINALMSG = false;
-            opts.CTXOPT_ADD_RULE = false;
-            opts.CTXOPT_ADD_RULE_LOCATION = false;
-            opts.CTXOPT_ALLOW_REGEX = false;
-            javaLognormImpl.liblognormSetCtxOpts(opts);
+            LognormFactory lognormFactory = new LognormFactory(opts);
+            JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
             String samplesString = "rule=tag1:Quantity: %N:number%"; // load rulebase that will cause exception
 
             javaLognormImpl.liblognormLoadSamplesFromString(samplesString);
@@ -195,22 +187,17 @@ class JavaLognormImplTest {
                     .assertEquals("ln_normalize() failed to perform extraction with error code: -1000", e.getMessage());
 
             // cleanup
-            javaLognormImpl.liblognormExitCtx();
+            javaLognormImpl.close();
         });
     }
 
     @Test
     public void normalizeExceptionTest3() {
         assertDoesNotThrow(() -> {
-            JavaLognormImpl javaLognormImpl = new JavaLognormImpl();
-            javaLognormImpl.liblognormSetErrMsgCB();
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
-            opts.CTXOPT_ADD_EXEC_PATH = false;
-            opts.CTXOPT_ADD_ORIGINALMSG = false;
-            opts.CTXOPT_ADD_RULE = false;
-            opts.CTXOPT_ADD_RULE_LOCATION = false;
-            opts.CTXOPT_ALLOW_REGEX = false;
-            javaLognormImpl.liblognormSetCtxOpts(opts);
+            LognormFactory lognormFactory = new LognormFactory(opts);
+            JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
+            javaLognormImpl.liblognormSetErrMsgCB();
             String samplesPath = "src/test/resources/json.rulebase";
             javaLognormImpl.liblognormLoadSamples(samplesPath); // Throws exception if fails to load samples
 
@@ -222,7 +209,7 @@ class JavaLognormImplTest {
                     .assertEquals("ln_normalize() failed to perform extraction with error code: -1000", e.getMessage());
 
             // cleanup
-            javaLognormImpl.liblognormExitCtx();
+            javaLognormImpl.close();
         });
     }
 
