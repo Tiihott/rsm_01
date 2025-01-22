@@ -101,7 +101,7 @@ public class CallbackTest {
                     .forEach(
                             expectedLogMessage -> Assertions
                                     .assertEquals(
-                                            logCaptor.getValue().getMessage().getFormattedMessage(), expectedLogMessage
+                                            expectedLogMessage, logCaptor.getValue().getMessage().getFormattedMessage()
                                     )
                     );
         }
@@ -120,7 +120,6 @@ public class CallbackTest {
         LognormFactory lognormFactory = new LognormFactory(opts);
         JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
         Logger loggerForTarget = (Logger) LogManager.getLogger(ErrorCallbackImpl.class);
-        javaLognormImpl.liblognormSetErrMsgCB();
         String expectedLogMessages = "liblognorm error: rulebase file --NO-FILE--[0]: invalid record type detected: 'invalidSample'";
 
         final Appender appender = mock(Appender.class);
@@ -133,17 +132,23 @@ public class CallbackTest {
         loggerForTarget.setLevel(Level.DEBUG);
         try {
             // invoke error callback via loadSamplesFromString() using invalid sample,
-            javaLognormImpl.liblognormLoadSamplesFromString("invalidSample");
+            IllegalArgumentException e = Assertions
+                    .assertThrows(
+                            IllegalArgumentException.class,
+                            () -> javaLognormImpl.liblognormLoadSamplesFromString("invalidSample")
+                    );
+            Assertions.assertEquals("<1> liblognorm errors have occurred, see logs for details.", e.getMessage());
             // Assert that the expected log messages are seen
+            // FIXME: logs are only being captured as a copy of the first log message. Number of messages is correct.
             verify(appender, times(1)).append(logCaptor.capture());
             Arrays.stream(new String[] {
-                    expectedLogMessages
+                    "liblognorm error: rulebase file --NO-FILE--[0]: invalid record type detected: 'invalidSample'"
             }
             )
                     .forEach(
                             expectedLogMessage -> Assertions
                                     .assertEquals(
-                                            logCaptor.getValue().getMessage().getFormattedMessage(), expectedLogMessage
+                                            expectedLogMessage, logCaptor.getValue().getMessage().getFormattedMessage()
                                     )
                     );
         }
@@ -153,7 +158,9 @@ public class CallbackTest {
             loggerForTarget.setLevel(effectiveLevel);
         }
         // cleanup
-        javaLognormImpl.close();
+        IllegalArgumentException e = Assertions
+                .assertThrows(IllegalArgumentException.class, () -> javaLognormImpl.close());
+        Assertions.assertEquals("<1> liblognorm errors have occurred, see logs for details.", e.getMessage());
     }
 
 }

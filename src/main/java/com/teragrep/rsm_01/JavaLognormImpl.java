@@ -73,6 +73,7 @@ public final class JavaLognormImpl implements JavaLognorm, AutoCloseable {
         }
 
         int i = LibJavaLognorm.jnaInstance.exitCtx(ctx);
+        errorCallbackImpl.throwOccurredErrors();
         if (i != 0) {
             LOGGER.error("ln_exitCtx() returned error code <{}>", i);
             throw new IllegalArgumentException("ln_exitCtx() returned " + i + " instead of 0");
@@ -91,10 +92,7 @@ public final class JavaLognormImpl implements JavaLognorm, AutoCloseable {
             LOGGER.error("ln_loadSamples() returned error code <{}>", i);
             throw new IllegalArgumentException("Load samples returned " + i + " instead of 0");
         }
-        if (errorCallbackImpl.isErrorOccured()) {
-            LOGGER.error("ln_loadSamples() has triggered an error");
-            throw new IllegalArgumentException("ln_loadSamples() has triggered an error, but returned 0.");
-        }
+        errorCallbackImpl.throwOccurredErrors();
     }
 
     public void liblognormLoadSamplesFromString(String samples) {
@@ -109,6 +107,7 @@ public final class JavaLognormImpl implements JavaLognorm, AutoCloseable {
             LOGGER.error("ln_loadSamplesFromString() returned error code <{}>", i);
             throw new IllegalArgumentException("ln_loadSamplesFromString() returned " + i + " instead of 0");
         }
+        errorCallbackImpl.throwOccurredErrors();
     }
 
     /* If an error is detected by the library, the method returns an error code and generated jref containing further error details in normalized form.
@@ -128,6 +127,7 @@ public final class JavaLognormImpl implements JavaLognorm, AutoCloseable {
                         "ln_normalize() failed to perform extraction with error code: " + result.rv
                 );
             }
+            errorCallbackImpl.throwOccurredErrors();
             return liblognormReadResult(result.jref);
         }
         else {
@@ -167,24 +167,12 @@ public final class JavaLognormImpl implements JavaLognorm, AutoCloseable {
             LOGGER.error("ln_setDebugCB() returned error code <{}>", i);
             throw new IllegalArgumentException("ln_setDebugCB() returned " + i + " instead of 0");
         }
-    }
-
-    public void liblognormSetErrMsgCB() {
-        if (ctx == Pointer.NULL) {
-            throw new IllegalArgumentException(
-                    "LogNorm() not initialized. Use liblognormInitCtx() to initialize the ctx."
-            );
-        }
-
-        int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, errorCallbackImpl);
-        if (i != 0) {
-            LOGGER.error("ln_setErrMsgCB() returned error code <{}>", i);
-            throw new IllegalArgumentException("ln_setErrMsgCB() returned " + i + " instead of 0");
-        }
+        errorCallbackImpl.throwOccurredErrors();
     }
 
     @Override
     public void close() throws IllegalArgumentException {
         liblognormExitCtx();
+        errorCallbackImpl.throwOccurredErrors();
     }
 }

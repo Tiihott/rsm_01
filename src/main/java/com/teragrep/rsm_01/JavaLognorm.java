@@ -55,8 +55,6 @@ public interface JavaLognorm {
 
     public abstract void liblognormSetDebugCB();
 
-    public abstract void liblognormSetErrMsgCB();
-
     public static final class Smart {
 
         public boolean liblognormHasAdvancedStats() {

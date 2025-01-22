@@ -63,7 +63,15 @@ public final class LognormFactory {
                     "ln_initCtx() returned a null pointer, liblognorm failed to initialize the context."
             );
         }
+        // Set error message callback for exception handling
+        ErrorCallbackImpl errorCallbackImpl = new ErrorCallbackImpl();
+        int i = LibJavaLognorm.jnaInstance.setErrMsgCB(ctx, errorCallbackImpl);
+        if (i != 0) {
+            throw new IllegalArgumentException("ln_setErrMsgCB() returned " + i + " instead of 0");
+        }
+        // Set options for the library use
         LibJavaLognorm.jnaInstance.setCtxOpts(ctx, options);
-        return new JavaLognormImpl(ctx);
+
+        return new JavaLognormImpl(ctx, errorCallbackImpl);
     }
 }

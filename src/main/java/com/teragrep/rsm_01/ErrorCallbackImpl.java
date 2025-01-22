@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-public class ErrorCallbackImpl implements ErrorCallback {
+public final class ErrorCallbackImpl implements ErrorCallback {
 
     private final ArrayList<String> errors;
 
@@ -67,10 +67,11 @@ public class ErrorCallbackImpl implements ErrorCallback {
         LOGGER.error("liblognorm error: {}", msg);
     }
 
-    public boolean isErrorOccured() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("<{}> liblognorm errors have occurred", errors.size());
+    public void throwOccurredErrors() {
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "<" + errors.size() + "> " + "liblognorm errors have occurred, see logs for details."
+            );
         }
-        return !errors.isEmpty();
     }
 }
