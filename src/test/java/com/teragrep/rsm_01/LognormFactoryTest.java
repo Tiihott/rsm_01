@@ -109,9 +109,9 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void loadSamplesJsonTest() {
+    public void loadSamplesJsonLiteralTest() {
         assertDoesNotThrow(() -> {
-            String samplesPath = "src/test/resources/jsonLiteral.rulebase";
+            String samplesPath = "src/test/resources/jsonLiteral.rulebase"; // rulebase in json using literal format with v2 engine tag
             File sampleFile = new File(samplesPath);
             Assertions.assertTrue(sampleFile.exists());
             LognormFactory lognormFactory = new LognormFactory(sampleFile);
@@ -147,9 +147,9 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void loadSamplesExceptionTest2() {
+    public void loadSamplesJsonCallbackExceptionTest() {
         assertDoesNotThrow(() -> {
-            String samplesPath = "src/test/resources/json.rulebase"; // rulebase in json format
+            String samplesPath = "src/test/resources/json.rulebase"; // rulebase in pure json format with v2 engine tag
             File sampleFile = new File(samplesPath);
             Assertions.assertTrue(sampleFile.exists());
             LognormFactory lognormFactory = new LognormFactory(sampleFile);
@@ -161,9 +161,9 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void loadSamplesExceptionTest3() {
+    public void loadSamplesJsonV1CallbackExceptionTest() {
         assertDoesNotThrow(() -> {
-            String samplesPath = "src/test/resources/jsonv1.rulebase"; // rulebase in json format
+            String samplesPath = "src/test/resources/jsonv1.rulebase"; // rulebase in pure json format without v2 engine tag
             File sampleFile = new File(samplesPath);
             Assertions.assertTrue(sampleFile.exists());
             LognormFactory lognormFactory = new LognormFactory(sampleFile);
@@ -175,9 +175,9 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void loadSamplesExceptionTest5() {
+    public void loadSamplesJsonLiteralCallbackExceptionTest() {
         assertDoesNotThrow(() -> {
-            String samplesPath = "src/test/resources/jsonv1Literal.rulebase"; // rulebase in json format
+            String samplesPath = "src/test/resources/jsonv1Literal.rulebase"; // rulebase in json using literal format without v2 engine tag
             File sampleFile = new File(samplesPath);
             Assertions.assertTrue(sampleFile.exists());
             LognormFactory lognormFactory = new LognormFactory(sampleFile);
@@ -235,7 +235,7 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void loadSamplesFromStringExceptionTest2() {
+    public void loadSamplesFromStringMultipleExceptionTest() {
         assertDoesNotThrow(() -> {
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
             LognormFactory lognormFactory = new LognormFactory(opts, "invalidRulebase\nmoreInvalidRules");
