@@ -66,33 +66,98 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void setCtxOptsTest() {
-        assertDoesNotThrow(() -> {
-            String samplesString = "rule=:%all:rest%";
-            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
-            opts.CTXOPT_ADD_ORIGINALMSG = true;
-            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
-            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
-                // Assert that original message is included in the result to see if opts are working
-                String s = javaLognormImpl.normalize("offline");
-                // Assert that the originalmsg is added to the result
-                Assertions.assertEquals("{ \"all\": \"offline\", \"originalmsg\": \"offline\" }", s);
-            }
-        });
-    }
-
-    @Test
     public void defaultCtxOptsTest() {
         assertDoesNotThrow(() -> {
             String samplesString = "rule=:%all:rest%";
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct(); // All opts disabled by default
             LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
             try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
-                // Assert that original message is included in the result to see if opts are working
                 String s = javaLognormImpl.normalize("offline");
-                // Assert that the originalmsg is not added to the result
+                // Assert that only normalized message is in the result.
                 Assertions.assertEquals("{ \"all\": \"offline\" }", s);
             }
+        });
+    }
+
+    @Test
+    public void originalMsgOptsTest() {
+        assertDoesNotThrow(() -> {
+            String samplesString = "rule=:%all:rest%";
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_ORIGINALMSG = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("offline");
+                // Assert that original message is included in the result to see if opts are working
+                Assertions.assertEquals("{ \"all\": \"offline\", \"originalmsg\": \"offline\" }", s);
+            }
+        });
+    }
+
+    @Test
+    public void ruleOptsTest() {
+        assertDoesNotThrow(() -> {
+            String samplesString = "rule=:%all:rest%";
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_RULE = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("offline");
+                // Assert that rule is included in the result to see if opts are working
+                Assertions
+                        .assertEquals(
+                                "{ \"all\": \"offline\", \"metadata\": { \"rule\": { \"mockup\": \"%all:rest%\" } } }",
+                                s
+                        );
+            }
+        });
+    }
+
+    @Test
+    public void locationOptsTest() {
+        assertDoesNotThrow(() -> {
+            String samplesString = "rule=:%all:rest%";
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_RULE_LOCATION = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("offline");
+                // Assert that rule file location information is included in the result to see if opts are working
+                Assertions
+                        .assertEquals(
+                                "{ \"all\": \"offline\", \"metadata\": { \"rule\": { \"location\": { \"file\": \"--NO-FILE--\", \"line\": 0 } } } }",
+                                s
+                        );
+            }
+        });
+    }
+
+    @Test
+    public void pathOptsTest() {
+        assertDoesNotThrow(() -> {
+            String samplesString = "rule=:%all:rest%";
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_EXEC_PATH = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("offline");
+                // Assert that CTXOPT_ADD_EXEC_PATH is no-op and doesn't affect the normalization result.
+                Assertions.assertEquals("{ \"all\": \"offline\" }", s);
+            }
+        });
+    }
+
+    @Test
+    public void regexOptsTest() {
+        assertDoesNotThrow(() -> {
+            String samplesString = "rule=regex:regex: %token:regex:abc.ef%";
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ALLOW_REGEX = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+            // Assert that using regex throws an exception when used with v2 engine with CTXOPT_ALLOW_REGEX option enabled.
+            IllegalArgumentException e = Assertions
+                    .assertThrows(IllegalArgumentException.class, () -> lognormFactory.lognorm());
+            Assertions.assertEquals("<1> liblognorm errors have occurred, see logs for details.", e.getMessage());
         });
     }
 
@@ -100,6 +165,18 @@ public class LognormFactoryTest {
     public void loadSamplesTest() {
         assertDoesNotThrow(() -> {
             String samplesPath = "src/test/resources/sample.rulebase";
+            File sampleFile = new File(samplesPath);
+            Assertions.assertTrue(sampleFile.exists());
+            LognormFactory lognormFactory = new LognormFactory(sampleFile);
+            JavaLognormImpl javaLognormImpl = lognormFactory.lognorm(); // throws if loading fails
+            javaLognormImpl.close();
+        });
+    }
+
+    @Test
+    public void loadSamplesRegexTest() {
+        assertDoesNotThrow(() -> {
+            String samplesPath = "src/test/resources/regex.rulebase";
             File sampleFile = new File(samplesPath);
             Assertions.assertTrue(sampleFile.exists());
             LognormFactory lognormFactory = new LognormFactory(sampleFile);

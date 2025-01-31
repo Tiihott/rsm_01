@@ -585,6 +585,7 @@
             <exclude>src/main/c/Makefile.am</exclude>
             <!-- test resources -->
             <exclude>src/test/resources/sample.rulebase</exclude>
+            <exclude>src/test/resources/regex.rulebase</exclude>
             <exclude>src/test/resources/json.rulebase</exclude>
             <exclude>src/test/resources/jsonv1.rulebase</exclude>
             <exclude>src/test/resources/jsonLiteral.rulebase</exclude>
