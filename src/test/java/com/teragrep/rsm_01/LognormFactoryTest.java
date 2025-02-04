@@ -45,16 +45,25 @@
  */
 package com.teragrep.rsm_01;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 public class LognormFactoryTest {
 
@@ -133,9 +142,9 @@ public class LognormFactoryTest {
     }
 
     @Test
-    public void pathOptsTest() {
+    public void pathOptsV2Test() {
         assertDoesNotThrow(() -> {
-            String samplesString = "rule=:%all:rest%";
+            String samplesString = "rule=:%all:rest%"; // Loading rulebase as string is always V2.
             LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
             opts.CTXOPT_ADD_EXEC_PATH = true;
             LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
@@ -143,6 +152,92 @@ public class LognormFactoryTest {
                 String s = javaLognormImpl.normalize("offline");
                 // Assert that CTXOPT_ADD_EXEC_PATH is no-op and doesn't affect the normalization result.
                 Assertions.assertEquals("{ \"all\": \"offline\" }", s);
+            }
+        });
+    }
+
+    @Test
+    public void pathOptsV2ExceptionTest() {
+        // Assert that CTXOPT_ADD_EXEC_PATH is no-op and doesn't affect the normalization result. Read logs to assert normalization result during exception.
+        String samplesString = "rule=tag1:Quantity: %N:number%"; // Loading rulebase as string is always V2.
+        // log4j2 configuration
+        Path log4j2Config = Paths.get("src/test/resources/log4j2Error.properties");
+        Configurator.reconfigure(log4j2Config.toUri());
+
+        LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+        opts.CTXOPT_ADD_EXEC_PATH = true;
+        LognormFactory lognormFactory = new LognormFactory(opts, samplesString);
+        JavaLognormImpl javaLognormImpl = lognormFactory.lognorm();
+
+        Logger loggerForTarget = (Logger) LogManager.getLogger(JavaLognormImpl.class);
+        String expectedLogMessages = "ln_normalize() failed to perform extraction with error code <-1000>. Generated error information: <{ \"originalmsg\": \"unparseable\", \"unparsed-data\": \"unparseable\" }>";
+
+        final Appender appender = mock(Appender.class);
+        when(appender.getName()).thenReturn("Mock appender");
+        when(appender.isStarted()).thenReturn(true);
+        final ArgumentCaptor<LogEvent> logCaptor = ArgumentCaptor.forClass(LogEvent.class);
+        final Level effectiveLevel = loggerForTarget.getLevel(); // Save the initial logger state
+        // Attach our test appender and make sure the messages will be logged
+        loggerForTarget.addAppender(appender);
+        loggerForTarget.setLevel(Level.ERROR);
+        try {
+            // invoke error callback
+            IllegalArgumentException e = Assertions
+                    .assertThrows(IllegalArgumentException.class, () -> javaLognormImpl.normalize("unparseable"));
+            Assertions
+                    .assertEquals("ln_normalize() failed to perform extraction with error code: -1000", e.getMessage());
+            // Assert that the expected log messages are seen after the exception is thrown
+            verify(appender, times(1)).append(logCaptor.capture());
+            Arrays.stream(new String[] {
+                    expectedLogMessages
+            }
+            )
+                    .forEach(
+                            expectedLogMessage -> Assertions
+                                    .assertEquals(
+                                            expectedLogMessage, logCaptor.getValue().getMessage().getFormattedMessage()
+                                    )
+                    );
+            javaLognormImpl.close();
+        }
+        finally {
+            // Restore logger state in case this affects other tests
+            loggerForTarget.removeAppender(appender);
+            loggerForTarget.setLevel(effectiveLevel);
+        }
+    }
+
+    @Test
+    public void pathOptsV1Test() {
+        assertDoesNotThrow(() -> {
+            String samplesPath = "src/test/resources/sample.rulebase"; // V1 rulebase file
+            File sampleFile = new File(samplesPath);
+            Assertions.assertTrue(sampleFile.exists());
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_EXEC_PATH = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, sampleFile);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("offline");
+                // Assert that CTXOPT_ADD_EXEC_PATH is no-op and doesn't affect the normalization result.
+                Assertions.assertEquals("{ \"all\": \"offline\" }", s);
+            }
+        });
+    }
+
+    @Test
+    public void pathOptsV1ExceptionTest() {
+        assertDoesNotThrow(() -> {
+            String samplesPath = "src/test/resources/regex.rulebase"; // V1 rulebase file
+            File sampleFile = new File(samplesPath);
+            Assertions.assertTrue(sampleFile.exists());
+            LibJavaLognorm.OptionsStruct opts = new LibJavaLognorm.OptionsStruct();
+            opts.CTXOPT_ADD_EXEC_PATH = true;
+            LognormFactory lognormFactory = new LognormFactory(opts, sampleFile);
+            try (JavaLognormImpl javaLognormImpl = lognormFactory.lognorm()) {
+                String s = javaLognormImpl.normalize("regex: 1234");
+                // Assert that CTXOPT_ADD_EXEC_PATH is no-op and doesn't affect the normalization result.
+                // FIXME: Something is very wrong with the V1 normalization engine of liblognorm. No errors are observed by the library but normalization has failed and the output is in error format.
+                Assertions.assertEquals("{ \"originalmsg\": \"regex: 1234\", \"unparsed-data\": \"1234\" }", s);
             }
         });
     }
